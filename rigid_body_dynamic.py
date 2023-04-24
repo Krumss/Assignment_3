@@ -94,7 +94,7 @@ def initial():
     # Hint: You can use the function ti.Matrix.dot to compute v^T*v
     # Hint: You can use the function ti.Matrix.identity(float, 3) to get a 3x3 identity matrix
     for i in ti.grouped(particle_vertices):
-        # inertia += particle_mass * ((particle_vertices[i] - body_cm_position[None]).dot(
+        inertia += particle_mass * -1 * ((particle_vertices[i] - body_cm_position[None]).outer_product(particle_vertices[i] - body_cm_position[None]))
         pass
 
     # Compute the inverse inertia of the body and store it in the field
@@ -143,7 +143,7 @@ def substep():
     # computer the force on each particle
     for i in ti.grouped(particle_vertices):
         # TODO 2: gravity
-        # particle_force[i] =
+        particle_force[i] = gravity
 
         # Collision force, we use a spring model to simulate the collision
         if particle_vertices[i][1] < -1:
@@ -166,7 +166,7 @@ def substep():
     body_force = ti.Vector([0.0, 0.0, 0.0])
     for i in ti.grouped(particle_vertices):
         # TODO 3: compute the force for rigid body
-        # body_force +=
+        body_force += particle_force[i]
         pass
 
     # computer the torque for rigid body
@@ -174,17 +174,17 @@ def substep():
     for i in ti.grouped(particle_vertices):
         # TODO 4: compute the torque for rigid body
         # Hint: use ti.math.cross(v1, v2) to compute the cross product
-        # torque +=
+        body_torque += ti.math.cross((particle_vertices[i] - body_cm_position[None]), particle_force[i])
         pass
 
     # update the rigid body
     # TODO 5: update the center of mass position and velocity
-    # body_velocity[None] +=
-    # body_cm_position[None] +=
+    body_velocity[None] += body_force / body_mass[None] * dt
+    body_cm_position[None] += body_velocity[None] * dt
 
     # TODO 6: update the rotation quaternion
     # d_q = 0.5 * quaternion_multiplication(ti.Vector([0, ?, ?, ?]), body_rotation_quaternion[None])
-    # body_rotation_quaternion[None] +=
+    # body_rotation_quaternion[None] += d_q
 
     # normalize the quaternion to avoid numerical error
     body_rotation_quaternion[None] /= body_rotation_quaternion[None].norm()
